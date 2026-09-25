@@ -1,5 +1,17 @@
 # Notifications Service
 
+- [1. What it does](#1-what-it-does)
+- [2. Configuration and running](#2-configuration-and-running)
+  - [Environment](#environment)
+  - [Running locally, against a stand-in provider](#running-locally-against-a-stand-in-provider)
+  - [Migrations](#migrations)
+  - [Seed data](#seed-data)
+  - [Tests](#tests)
+  - [Running against MessageBird](#running-against-messagebird)
+- [3. Endpoints](#3-endpoints)
+- [4. What production would need](#4-what-production-would-need)
+  - [A durable record of intent](#a-durable-record-of-intent)
+
 ## 1. What it does
 
 Sends dunning SMS notifications to loan customers through the MessageBird API.
