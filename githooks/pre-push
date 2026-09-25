@@ -1,0 +1,3 @@
+#!/bin/sh
+
+go tool -modfile=tools/go.mod golangci-lint run

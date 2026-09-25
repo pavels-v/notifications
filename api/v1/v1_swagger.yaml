@@ -1,0 +1,377 @@
+basePath: /v1
+definitions:
+  domain.Customer:
+    properties:
+      amount_minor:
+        type: integer
+      created_at:
+        type: string
+      credit_number:
+        type: string
+      currency:
+        type: string
+      due_date:
+        type: string
+      full_name:
+        type: string
+      phone_number:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.Message:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      credit_number:
+        type: string
+      error:
+        type: string
+      id:
+        type: integer
+      provider_message_id:
+        type: string
+      status:
+        $ref: '#/definitions/domain.MessageStatus'
+      template:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.MessageStatus:
+    enum:
+    - pending
+    - sent_to_provider
+    - rejected_by_provider
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusSentToProvider
+    - StatusRejectedByProvider
+  domain.Template:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  v1.customerRequest:
+    properties:
+      amount_minor:
+        type: integer
+      credit_number:
+        type: string
+      currency:
+        type: string
+      due_date:
+        type: string
+      full_name:
+        type: string
+      phone_number:
+        type: string
+    type: object
+  v1.errorBody:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  v1.sendRequest:
+    properties:
+      template_type:
+        type: string
+    type: object
+  v1.templateRequest:
+    properties:
+      body:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: SMS notifications for overdue loans.
+  title: Notifications API
+  version: "1.0"
+paths:
+  /customers:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Customer'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+      summary: List loans
+      tags:
+      - customers
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Loan
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/v1.customerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+      summary: Create a loan
+      tags:
+      - customers
+  /customers/{credit_number}:
+    get:
+      parameters:
+      - description: Credit number
+        in: path
+        name: credit_number
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Customer'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+      summary: Get a loan
+      tags:
+      - customers
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Credit number
+        in: path
+        name: credit_number
+        required: true
+        type: string
+      - description: Loan
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/v1.customerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+      summary: Update a loan
+      tags:
+      - customers
+  /customers/{credit_number}/messages:
+    get:
+      parameters:
+      - description: Credit number
+        in: path
+        name: credit_number
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Message'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+      summary: List the messages of a loan
+      tags:
+      - messages
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Credit number
+        in: path
+        name: credit_number
+        required: true
+        type: string
+      - description: Template to render
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/v1.sendRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/domain.Message'
+      summary: Send a message to a loan
+      tags:
+      - messages
+  /templates:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Template'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+      summary: List templates
+      tags:
+      - templates
+  /templates/{type}:
+    get:
+      parameters:
+      - description: Template type
+        enum:
+        - reminder
+        - dunning
+        - termination
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Template'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+      summary: Get a template
+      tags:
+      - templates
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Template type
+        enum:
+        - reminder
+        - dunning
+        - termination
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: Template body
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/v1.templateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Template'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorBody'
+      summary: Create or replace a template
+      tags:
+      - templates
+swagger: "2.0"

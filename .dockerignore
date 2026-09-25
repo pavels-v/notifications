@@ -1,0 +1,6 @@
+# Relative to the build context, which is the repository root: the Dockerfile
+# lives in build/package/, but Docker resolves this file against the context.
+.git
+docs
+bin
+.env
